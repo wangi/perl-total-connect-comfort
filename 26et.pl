@@ -1,4 +1,13 @@
 #!/usr/bin/env perl
+#
+# Fetches weather data from Google Weather API, gets Honeywell Total Connect
+# zone targets and current readings, logs to CSV and database
+#
+# Install:
+#  ./26et-setup-database.sh
+#  ./26et-setup.sh
+#  vi ~/.config/systemd/user/26et.service
+#
 
 use warnings;
 use strict;
@@ -17,7 +26,8 @@ GetOptions('debug' => \$debug) or die "Usage: $0 [--debug]\n";
 # get current time, output filename
 my $t     = time;
 my $tfmt  = POSIX::strftime("%m/%d/%Y %H:%M:%S", gmtime($t));
-my $fname = POSIX::strftime("/home/pi/data/%Y%m.csv", gmtime($t));
+my $home  = $ENV{HOME} || (getpwuid($<))[7];
+my $fname = POSIX::strftime("${home}/data/%Y%m.csv", gmtime($t));
 my $file_exists = -f $fname ? 1 : 0;
 
 # Open file handle for writing (unless in debug mode)

@@ -1,0 +1,44 @@
+[Unit]
+Description=Total Connect Comfort data logger
+Documentation=https://github.com/wangi/perl-total-connect-comfort
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=%u
+WorkingDirectory=%h/code/perl-total-connect-comfort
+
+# Perl module search path
+Environment="PERL5LIB=%h/code/perl-total-connect-comfort"
+
+# Total Connect Comfort API credentials
+Environment="TCC_USERNAME=your_username@example.com"
+Environment="TCC_PASSWORD=your_password"
+
+# Database connection settings
+Environment="DB_CONNECTION=DBI:Pg:dbname=evohome;host=localhost"
+Environment="DB_USERNAME=your_db_username"
+Environment="DB_PASSWORD=your_db_password"
+
+# Google Weather API settings
+Environment="GOOGLE_API_KEY=your_google_api_key"
+Environment="LATITUDE=55.9533"
+Environment="LONGITUDE=-3.1883"
+
+# Run the data logger
+ExecStart=%h/code/perl-total-connect-comfort/26et.pl
+
+# Restart on failure
+Restart=on-failure
+RestartSec=5m
+
+# Security hardening
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/data
+
+[Install]
+WantedBy=default.target
