@@ -29,9 +29,12 @@ if (!$debug) {
 # get configuration from environment variables
 my $username = $ENV{TCC_USERNAME} or die "TCC_USERNAME environment variable not set\n";
 my $password = $ENV{TCC_PASSWORD} or die "TCC_PASSWORD environment variable not set\n";
-my $db_connection = $ENV{DB_CONNECTION} or die "DB_CONNECTION environment variable not set\n";
-my $db_username   = $ENV{DB_USERNAME}   or die "DB_USERNAME environment variable not set\n";
-my $db_password   = $ENV{DB_PASSWORD}   or die "DB_PASSWORD environment variable not set\n";
+my $db_connection  = $ENV{DB_CONNECTION}  or die "DB_CONNECTION environment variable not set\n";
+my $db_username    = $ENV{DB_USERNAME}    or die "DB_USERNAME environment variable not set\n";
+my $db_password    = $ENV{DB_PASSWORD}    or die "DB_PASSWORD environment variable not set\n";
+my $latitude       = $ENV{LATITUDE}       || '55.9533';   # Edinburgh default
+my $longitude      = $ENV{LONGITUDE}      || '-3.1883';   # Edinburgh default
+my $google_api_key = $ENV{GOOGLE_API_KEY} or die "GOOGLE_API_KEY environment variable not set\n";
 
 # connect to database (unless in debug mode)
 my $db;
@@ -42,17 +45,35 @@ if (!$debug) {
     $query = $db->prepare("INSERT INTO evohome(datetime, temperature, humidity, weather, temp_living, temp_living_target, temp_kitchen, temp_kitchen_target, temp_toilet, temp_toilet_target, temp_utility, temp_utility_target, temp_freya, temp_freya_target, temp_spare, temp_spare_target, temp_landing, temp_landing_target, temp_master, temp_master_target, temp_study, temp_study_target) VALUES(to_timestamp(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 }
 
-# get current weather: BBC, Joppa
-my $URL = 'https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/2645947';
+# build user agent string from repo name and username
+my $username_prefix = $username;
+$username_prefix =~ s/@.*//;  # extract part before '@'
+my $user_agent_string = "perl-total-connect-comfort/${username_prefix}";
+
+# get current weather from Google Weather API
+my $weather_url = "https://weather.googleapis.com/v1/currentConditions:lookup?location.latitude=${latitude}&location.longitude=${longitude}&key=${google_api_key}";
 my $userAgent = LWP::UserAgent->new(keep_alive => 20);
-my $resp = $userAgent->get($URL);
+$userAgent->agent($user_agent_string);
+my $resp = $userAgent->get($weather_url);
+
 my $temperature  = '';
 my $humidity     = '';
 my $weatherstate = '';
-foreach ( split "\n", decode('utf-8', $resp->content) )
-{
-	$temperature = $1 if( /Temperature: ([\d\-]+).C/ );
-	$humidity    = $1 if( /Humidity: ([\d]+)%/ );
+
+if ($resp->is_success) {
+	my $weather_data = from_json($resp->content);
+
+	# extract temperature (in degrees Celsius)
+	$temperature = $weather_data->{temperature}->{degrees} if exists $weather_data->{temperature}->{degrees};
+
+	# extract relative humidity (as percentage)
+	$humidity = $weather_data->{relativeHumidity} if exists $weather_data->{relativeHumidity};
+
+	# extract weather condition description
+	$weatherstate = $weather_data->{weatherCondition}->{description}->{text}
+		if exists $weather_data->{weatherCondition}->{description}->{text};
+} else {
+	warn "Failed to fetch weather data: " . $resp->status_line . "\n";
 }
 
 # log in
