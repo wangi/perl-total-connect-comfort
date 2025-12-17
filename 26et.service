@@ -6,7 +6,6 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=%u
 WorkingDirectory=%h/code/perl-total-connect-comfort
 
 # Perl module search path
