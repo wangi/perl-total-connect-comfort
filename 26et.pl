@@ -34,24 +34,14 @@ my $query = $db->prepare("INSERT INTO evohome(datetime, temperature, humidity, w
 my $URL = 'https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/2645947';
 my $userAgent = LWP::UserAgent->new(keep_alive => 20);
 my $resp = $userAgent->get($URL);
-my $bbc_temperature  = '';
-my $bbc_humidity     = '';
-my $bbc_weatherstate = '';
+my $temperature  = '';
+my $humidity     = '';
+my $weatherstate = '';
 foreach ( split "\n", decode('utf-8', $resp->content) )
 {
-	$bbc_temperature = $1 if( /Temperature: ([\d\-]+).C/ );
-	$bbc_humidity    = $1 if( /Humidity: ([\d]+)%/ );
+	$temperature = $1 if( /Temperature: ([\d\-]+).C/ );
+	$humidity    = $1 if( /Humidity: ([\d]+)%/ );
 }
-
-## get current weather
-$URL = 'https://www.metaweather.com/api/location/19344/';
-$resp = $userAgent->get($URL);
-$resp = decode('utf-8', $resp->content());
-my $json = JSON->new();
-my $mw = $json->decode($resp);
-my $temperature  = $mw->{consolidated_weather}->[0]->{the_temp};
-my $humidity     = $mw->{consolidated_weather}->[0]->{humidity};
-my $weatherstate = lc $mw->{consolidated_weather}->[0]->{weather_state_name};
 
 # Log in
 my $cn = Device::TotalConnectComfort->new( username => $username,
@@ -74,10 +64,10 @@ for my $zone ( @{$status_data->{gateways}->[0]->{temperatureControlSystems}->[0]
 }
 
 print $fh "unixtime,datetime,temperature,humidity,weather,living,living target,kitchen,kitchen target,toilet,toilet target,utility,utility target,freya,freya target,spare,spare target,landing,landing target,master,master target,study,study target\n" if( $file_exists == 0 );
-print $fh "$t,$tfmt,$bbc_temperature,$bbc_humidity,$weatherstate,$data{living}{temp},$data{living}{target},$data{kitchen}{temp},$data{kitchen}{target},$data{toilet}{temp},$data{toilet}{target},$data{utility}{temp},$data{utility}{target},$data{freya}{temp},$data{freya}{target},$data{spare}{temp},$data{spare}{target},$data{landing}{temp},$data{landing}{target},$data{master}{temp},$data{master}{target},$data{study}{temp},$data{study}{target}\n";
+print $fh "$t,$tfmt,$temperature,$humidity,$weatherstate,$data{living}{temp},$data{living}{target},$data{kitchen}{temp},$data{kitchen}{target},$data{toilet}{temp},$data{toilet}{target},$data{utility}{temp},$data{utility}{target},$data{freya}{temp},$data{freya}{target},$data{spare}{temp},$data{spare}{target},$data{landing}{temp},$data{landing}{target},$data{master}{temp},$data{master}{target},$data{study}{temp},$data{study}{target}\n";
 close $fh;
 
-$query->execute($t, $bbc_temperature, $bbc_humidity, $weatherstate, $data{living}{temp}, $data{living}{target}, $data{kitchen}{temp}, $data{kitchen}{target}, $data{toilet}{temp}, $data{toilet}{target}, $data{utility}{temp}, $data{utility}{target}, $data{freya}{temp}, $data{freya}{target}, $data{spare}{temp}, $data{spare}{target}, $data{landing}{temp}, $data{landing}{target}, $data{master}{temp}, $data{master}{target}, $data{study}{temp}, $data{study}{target});
+$query->execute($t, $temperature, $humidity, $weatherstate, $data{living}{temp}, $data{living}{target}, $data{kitchen}{temp}, $data{kitchen}{target}, $data{toilet}{temp}, $data{toilet}{target}, $data{utility}{temp}, $data{utility}{target}, $data{freya}{temp}, $data{freya}{target}, $data{spare}{temp}, $data{spare}{target}, $data{landing}{temp}, $data{landing}{target}, $data{master}{temp}, $data{master}{target}, $data{study}{temp}, $data{study}{target});
 
 __DATA__
 
