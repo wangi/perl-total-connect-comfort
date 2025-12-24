@@ -1,15 +1,13 @@
 [Unit]
 Description=Total Connect Comfort data logger
 Documentation=https://github.com/wangi/perl-total-connect-comfort
-After=network-online.target
-Wants=network-online.target
 
 [Service]
-Type=oneshot
-WorkingDirectory=%h/code/perl-total-connect-comfort
+User=evohome
+Group=evohome
 
 # Perl module search path
-Environment="PERL5LIB=%h/code/perl-total-connect-comfort"
+Environment="PERL5LIB=/user/evohome/code/perl-total-connect-comfort"
 
 # Total Connect Comfort API credentials
 Environment="TCC_USERNAME=your_username@example.com"
@@ -26,18 +24,7 @@ Environment="LATITUDE=55.9533"
 Environment="LONGITUDE=-3.1883"
 
 # Run the data logger
-ExecStart=%h/code/perl-total-connect-comfort/26et.pl
-
-# Restart on failure
-Restart=on-failure
-RestartSec=5m
-
-# Security hardening
-PrivateTmp=yes
-NoNewPrivileges=yes
-ProtectSystem=strict
-ProtectHome=read-only
-ReadWritePaths=%h/data
+ExecStart=/home/evohome/code/perl-total-connect-comfort/26et.pl
 
 [Install]
 WantedBy=default.target

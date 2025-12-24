@@ -6,7 +6,7 @@
 # Install:
 #  ./26et-setup-database.sh
 #  ./26et-setup.sh
-#  vi ~/.config/systemd/user/26et.service
+#  sudo systemctl edit 26et.service
 #
 
 use warnings;

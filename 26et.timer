@@ -1,18 +1,10 @@
 [Unit]
 Description=Total Connect Comfort data logger timer
 Documentation=https://github.com/wangi/perl-total-connect-comfort
-Requires=26et.service
 
 [Timer]
-# Run every 10 minutes
-OnBootSec=2min
-OnUnitActiveSec=10min
-
-# Run at consistent times (aligned to the clock)
-AccuracySec=1s
-
-# Ensure timer runs even if system was suspended
-Persistent=true
+OnCalendar=*:0/10
+Unit=26et.service
 
 [Install]
 WantedBy=timers.target

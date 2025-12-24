@@ -17,13 +17,12 @@ sudo apt install -y perl libperl-dev libwww-perl liblwp-protocol-https-perl \
 mkdir ~/data
 
 echo "Configuring user systemd units..."
-mkdir -p ~/.config/systemd/user
-cp 26et.service 26et.timer ~/.config/systemd/user/
-echo "vi ~/.config/systemd/user/26et.service"
+sudo cp 26et.{service,timer} 26et.timer /etc/systemd/system/
+echo "Using: sudo systemctl edit 26et.service"
 echo "Remember to update Environment lines!"
-systemctl --user daemon-reload
-systemctl --user enable --now 26et.timer
+sudo systemctl daemon-reload
+sudo systemctl enable 26et.timer
 
 echo "Useful commands: "
-echo "systemctl --user list-timers 26et.timer"
-echo "journalctl --user -u 26et.service -f"
+echo "systemctl list-timers 26et.timer"
+echo "journalctl -u 26et.service -f"
