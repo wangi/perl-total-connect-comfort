@@ -60,30 +60,45 @@ my $username_prefix = $username;
 $username_prefix =~ s/@.*//;  # extract part before '@'
 my $user_agent_string = "perl-total-connect-comfort/${username_prefix}";
 
-# get current weather from Google Weather API
+# get current weather from Google Weather API with retries
 my $weather_url = "https://weather.googleapis.com/v1/currentConditions:lookup?location.latitude=${latitude}&location.longitude=${longitude}&key=${google_api_key}";
 my $userAgent = LWP::UserAgent->new(keep_alive => 20);
 $userAgent->agent($user_agent_string);
-my $resp = $userAgent->get($weather_url);
 
 my $temperature  = '';
 my $humidity     = '';
 my $weatherstate = '';
 
-if ($resp->is_success) {
-	my $weather_data = from_json($resp->content);
+my $max_retries = 3;
+my $retry_delay = 5;  # seconds
+my $resp;
 
-	# extract temperature (in degrees Celsius)
-	$temperature = $weather_data->{temperature}->{degrees} if exists $weather_data->{temperature}->{degrees};
+for my $attempt (1 .. $max_retries) {
+	$resp = $userAgent->get($weather_url);
 
-	# extract relative humidity (as percentage)
-	$humidity = $weather_data->{relativeHumidity} if exists $weather_data->{relativeHumidity};
+	if ($resp->is_success) {
+		my $weather_data = from_json($resp->content);
 
-	# extract weather condition description
-	$weatherstate = $weather_data->{weatherCondition}->{description}->{text}
-		if exists $weather_data->{weatherCondition}->{description}->{text};
-} else {
-	warn "Failed to fetch weather data: " . $resp->status_line . "\n";
+		# extract temperature (in degrees Celsius)
+		$temperature = $weather_data->{temperature}->{degrees} if exists $weather_data->{temperature}->{degrees};
+
+		# extract relative humidity (as percentage)
+		$humidity = $weather_data->{relativeHumidity} if exists $weather_data->{relativeHumidity};
+
+		# extract weather condition description
+		$weatherstate = $weather_data->{weatherCondition}->{description}->{text}
+			if exists $weather_data->{weatherCondition}->{description}->{text};
+
+		last;  # success, exit retry loop
+	} else {
+		warn "Weather API attempt $attempt/$max_retries failed: " . $resp->status_line . "\n";
+		if ($attempt < $max_retries) {
+			warn "Retrying in $retry_delay seconds...\n";
+			sleep $retry_delay;
+		} else {
+			warn "Failed to fetch weather data after $max_retries attempts\n";
+		}
+	}
 }
 
 # log in
