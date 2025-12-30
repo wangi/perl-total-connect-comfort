@@ -20,11 +20,17 @@ Environment="DB_PASSWORD=your_db_password"
 
 # Google Weather API settings
 Environment="GOOGLE_API_KEY=your_google_api_key"
-Environment="LATITUDE=55.9533"
-Environment="LONGITUDE=-3.1883"
+
+# Default fallback coordinates (used if no location-specific LATLON_* is set)
+Environment="LATITUDE=55.95330"
+Environment="LONGITUDE=-3.18830"
+
+# Location-specific coordinates (format: LATLON_<location_id>="latitude,longitude")
+# Example for location ID 4814911:
+Environment="LATLON_4814911=55.94928,-3.09662"
 
 # Run the data logger
-ExecStart=/home/evohome/code/perl-total-connect-comfort/26et.pl
+ExecStart=/home/evohome/code/perl-total-connect-comfort/tcc-db-logger.pl
 
 [Install]
 WantedBy=default.target

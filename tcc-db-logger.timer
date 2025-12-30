@@ -4,7 +4,7 @@ Documentation=https://github.com/wangi/perl-total-connect-comfort
 
 [Timer]
 OnCalendar=*:0/10
-Unit=26et.service
+Unit=tcc-db-logger.service
 
 [Install]
 WantedBy=timers.target
