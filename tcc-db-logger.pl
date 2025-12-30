@@ -82,8 +82,8 @@ if (!$debug) {
 	});
 
 	$zone_reading_insert = $db->prepare(q{
-		INSERT INTO zone_readings (datetime, zone_id, temperature, target_temperature, setpoint_mode)
-		VALUES (?, ?, ?, ?, ?)
+		INSERT INTO zone_readings (datetime, zone_id, temperature, target_temperature, setpoint_mode, metadata)
+		VALUES (?, ?, ?, ?, ?, ?::jsonb)
 		ON CONFLICT (datetime, zone_id) DO NOTHING
 	});
 }
@@ -199,12 +199,26 @@ foreach my $location (@$locations_data) {
 				my $target = $zone->{setpointStatus}->{targetHeatTemperature};
 				my $setpoint_mode = $zone->{setpointStatus}->{setpointMode} || '';
 
+				# Build metadata JSON with additional zone information
+				my $metadata = {
+					temperature_is_available => $zone->{temperatureStatus}->{isAvailable} ? JSON::true : JSON::false,
+					active_faults => $zone->{activeFaults} || [],
+				};
+
+				# Add system mode status if available
+				if ($tcs->{systemModeStatus}) {
+					$metadata->{system_mode} = $tcs->{systemModeStatus}->{mode};
+					$metadata->{system_mode_permanent} = $tcs->{systemModeStatus}->{isPermanent} ? JSON::true : JSON::false;
+				}
+
+				my $metadata_json = to_json($metadata);
+
 				print "    Zone: $display_name ($zone_id) - ${temp}°C / ${target}°C [$setpoint_mode]\n" if $debug;
 
 				# Upsert zone
 				if (!$debug) {
 					$zone_upsert->execute($zone_id, $location_id, $zone_name, $display_name);
-					$zone_reading_insert->execute($datetime, $zone_id, $temp, $target, $setpoint_mode);
+					$zone_reading_insert->execute($datetime, $zone_id, $temp, $target, $setpoint_mode, $metadata_json);
 				}
 			}
 		}
