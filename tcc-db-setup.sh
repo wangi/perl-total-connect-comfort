@@ -15,8 +15,8 @@ sudo systemctl start postgresql
 
 # Database credentials (change these!)
 DB_NAME="evohome"
-DB_USER="evohome_user"
-DB_PASS="change_this_password"
+DB_USER="evohome"
+DB_PASS="evohome"
 
 echo "Creating database and user..."
 sudo -u postgres psql <<EOF

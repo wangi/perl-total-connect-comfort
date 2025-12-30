@@ -26,8 +26,8 @@ Environment="LATITUDE=55.95330"
 Environment="LONGITUDE=-3.18830"
 
 # Location-specific coordinates (format: LATLON_<location_id>="latitude,longitude")
-# Example for location ID 4814911:
-Environment="LATLON_4814911=55.94928,-3.09662"
+# Example for location ID 1234567:
+Environment="LATLON_1234567=55.12345,-3.12345"
 
 # Run the data logger
 ExecStart=/home/evohome/code/perl-total-connect-comfort/tcc-db-logger.pl
