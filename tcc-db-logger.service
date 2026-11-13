@@ -7,7 +7,7 @@ User=evohome
 Group=evohome
 
 # Perl module search path
-Environment="PERL5LIB=/user/evohome/code/perl-total-connect-comfort"
+Environment="PERL5LIB=/home/evohome/code/perl-total-connect-comfort"
 
 # Total Connect Comfort API credentials
 Environment="TCC_USERNAME=your_username@example.com"
