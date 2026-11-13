@@ -112,7 +112,7 @@ sub _setup_request {
     my %params = @_;
 
     # Setup location
-    my $host      = 'https://tccna.honeywell.com';
+    my $host      = 'https://tccna.resideo.com';
     # conditionally add default $BASE_PATH unless passed an absolute uri
     my $base_path = (substr($params{path}, 0, 1) eq '/') ? '' : $BASE_PATH;
     my $url       = URI->new( $host . $base_path . $params{path} );
