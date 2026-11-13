@@ -1,0 +1,32 @@
+[Unit]
+Description=Total Connect Comfort web front end
+Documentation=https://github.com/wangi/perl-total-connect-comfort
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+User=evohome
+Group=evohome
+WorkingDirectory=/home/evohome/code/perl-total-connect-comfort/web
+
+# Plain HTTP; put TLS and authentication in front of it (e.g. nginx).
+# Use http://127.0.0.1:8080 if the proxy runs on this machine.
+Environment="TCC_WEB_LISTEN=http://*:8080"
+
+# Database connection settings (put real values in a drop-in:
+# sudo systemctl edit tcc-web.service)
+Environment="DB_CONNECTION=DBI:Pg:dbname=evohome;host=localhost"
+Environment="DB_USERNAME=your_db_username"
+Environment="DB_PASSWORD=your_db_password"
+
+ExecStart=/home/evohome/code/perl-total-connect-comfort/web/tcc-web.pl daemon -m production -l ${TCC_WEB_LISTEN}
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

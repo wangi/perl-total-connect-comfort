@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Heating</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='6' y='1' width='4' height='10' rx='2' fill='%23eb6834'/%3E%3Ccircle cx='8' cy='12' r='3.5' fill='%23eb6834'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="vendor/uPlot.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="title">
+    <a href="./" id="home-link" class="crumb" hidden>&larr; All zones</a>
+    <h1 id="page-title">Home heating</h1>
+  </div>
+  <div id="now-summary" class="now-summary"></div>
+</header>
+
+<main>
+  <div id="alerts" class="alerts" aria-live="polite"></div>
+
+  <section id="zone-cards" class="zone-cards" aria-label="Zones"></section>
+
+  <section class="panel">
+    <div class="controls" role="toolbar" aria-label="Time range">
+      <div class="seg" role="group" aria-label="Span">
+        <button type="button" data-span="day">Day</button>
+        <button type="button" data-span="week">Week</button>
+        <button type="button" data-span="month">Month</button>
+      </div>
+      <div class="pager">
+        <button type="button" id="prev" aria-label="Earlier">&#9664;</button>
+        <span id="range-label" class="range-label"></span>
+        <button type="button" id="next" aria-label="Later">&#9654;</button>
+      </div>
+      <button type="button" id="now-btn" class="link-btn">Now</button>
+      <label class="goto">Go to <input type="date" id="goto-date"></label>
+    </div>
+
+    <div id="chart" class="chart" role="img" aria-label="Temperature chart"></div>
+    <p id="chart-empty" class="chart-empty" hidden>No readings in this period.</p>
+    <div id="chart-key" class="chart-key"></div>
+  </section>
+
+  <section id="fault-panel" class="panel" hidden>
+    <h2>Battery warnings in this period</h2>
+    <ul id="fault-list" class="fault-list"></ul>
+  </section>
+
+  <section class="panel">
+    <details id="table-details">
+      <summary>Data table</summary>
+      <div class="table-wrap"><table id="data-table"></table></div>
+    </details>
+  </section>
+</main>
+
+<script src="vendor/uPlot.iife.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

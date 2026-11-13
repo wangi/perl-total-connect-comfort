@@ -55,6 +55,15 @@ The module ([Device/TotalConnectComfort.pm](Device/TotalConnectComfort.pm)) prov
 - Supports multiple locations with dynamic zone discovery
 - Location-specific weather coordinates via `LATLON_<location_id>` environment variables
 
+**[web/tcc-web.pl](web/tcc-web.pl)**: Web front end (Mojolicious::Lite, read-only)
+- Serves `web/public/index.html`, `app.js`, `style.css` and a vendored uPlot (`web/public/vendor/`, v1.6.31); the browser draws the charts
+- JSON API: `api/summary` (latest reading per zone, weather, current faults), `api/overview?from&to` (all zones), `api/zone/:id?from&to` (one zone with target, outdoor temperature and the same window in past years). `from`/`to` are epoch seconds
+- Readings are averaged into buckets on the server (10 min minimum, at most about 800 points per series), and gaps come back as `null`
+- Battery faults come from `zone_readings.metadata->'active_faults'`, merged into intervals
+- The database session is read-only (`default_transaction_read_only`)
+- All URLs in the page are relative, so it works when proxied under a sub-path (as long as the proxied path ends in `/`)
+- Run locally against the live DB: `ssh -N -L 15432:localhost:5432 evohome@evohome.home`, then `DB_CONNECTION='DBI:Pg:dbname=evohome;host=localhost;port=15432' DB_USERNAME=... DB_PASSWORD=... web/tcc-web.pl daemon -l http://127.0.0.1:18080`
+
 **[cacti-scripts/temperature.pl](cacti-scripts/temperature.pl)**: Cacti monitoring integration
 - Returns all zone temperatures and setpoints in Cacti format
 - Calculates boiler status (on if any zone setpoint > temperature)
@@ -110,7 +119,8 @@ Required modules (based on code usage):
 - `LWP::Protocol::https` - HTTPS support for LWP
 - `URI::Escape` - URL parameter encoding
 - `Text::Table` - Formatted output (test_api.pl)
-- `DBI` + `DBD::Pg` - PostgreSQL access (tcc-db-logger.pl)
+- `DBI` + `DBD::Pg` - PostgreSQL access (tcc-db-logger.pl, web)
+- `Mojolicious` - web front end (Debian: `libmojolicious-perl`)
 - `POSIX` - Date formatting (tcc-db-logger.pl)
 
 `tcc-system-setup.sh` installs these as Debian packages.
@@ -123,6 +133,8 @@ The logger runs live on `evohome@evohome.home`, from a git checkout at `/home/ev
 - `tcc-db-logger.timer` fires every 10 minutes (`*:0/10`) and starts `tcc-db-logger.service`.
 - The real credentials and settings live in a systemd drop-in (`systemctl edit tcc-db-logger.service`). The committed `.service` file only has placeholders, so never put real secrets in it.
 - Check runs with `journalctl -u tcc-db-logger.service`. A successful run logs `Data logged successfully at <timestamp>`.
+- `tcc-web.service` runs the web front end on port 8080 (`TCC_WEB_LISTEN`), with DB settings in its own drop-in. nginx runs on a different host and provides TLS and authentication. Restart the service after deploying web changes (`sudo systemctl restart tcc-web`).
+- Timestamps in the database are UTC (`timestamp without time zone`); the web page shows them in the browser's local time.
 - First-time setup: `tcc-system-setup.sh` (packages and systemd units) and `tcc-db-setup.sh` (PostgreSQL database, user and schema).
 
 ## API Response Structure

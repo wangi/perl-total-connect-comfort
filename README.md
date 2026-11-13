@@ -16,6 +16,13 @@ Call the test script with ./test_api.pl *username* *password* (don't forget to s
 - Runs periodically via systemd timer to track historical data
 - Supports multiple locations with dynamic zone discovery
 
+## Web front end
+**[web/tcc-web.pl](web/tcc-web.pl)**: browser view of the logged data (Mojolicious, read-only)
+- Overview: every zone's temperature over the last 24 hours, week or month, with outdoor temperature; page backwards and forwards in time
+- Per-zone view: temperature, target, outdoor temperature, shading where the zone was calling for heat, and the same period in previous years
+- Current and historical low-battery warnings, and a warning if the logger has stopped
+- Plain HTTP on port 8080 by default; put TLS and authentication in front of it with a reverse proxy
+
 ## Cacti
 
 Also includes Cacti scripts and templates to make setting up Cacti monitoring simple.
