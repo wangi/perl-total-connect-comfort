@@ -160,15 +160,18 @@ get '/api/summary' => sub ($c) {
 	return $c->render(json => { error => 'no locations in database' }, status => 404) unless $loc;
 
 	my $zones = db()->selectall_arrayref(qq{
-		SELECT DISTINCT ON (z.zone_id)
-		       z.zone_id AS id, z.zone_name AS name,
+		SELECT z.zone_id AS id, z.zone_name AS name,
 		       @{[ epoch_of('r.datetime') ]} AS time,
 		       r.temperature, r.target_temperature AS target, r.setpoint_mode AS mode,
 		       r.metadata
 		FROM zones z
-		JOIN zone_readings r USING (zone_id)
+		-- one index probe per zone, rather than reading every row
+		CROSS JOIN LATERAL (
+			SELECT * FROM zone_readings r WHERE r.zone_id = z.zone_id
+			ORDER BY r.datetime DESC LIMIT 1
+		) r
 		WHERE z.location_id = ?
-		ORDER BY z.zone_id, r.datetime DESC
+		ORDER BY z.zone_id
 	}, { Slice => {} }, $loc->{id});
 
 	my $json = JSON::PP->new;
@@ -188,8 +191,13 @@ get '/api/summary' => sub ($c) {
 	$weather->{temperature} = round1($weather->{temperature}) if $weather;
 
 	my ($first) = db()->selectrow_array(qq{
-		SELECT @{[ epoch_of('min(r.datetime)') ]}
-		FROM zone_readings r JOIN zones z USING (zone_id) WHERE z.location_id = ?
+		SELECT @{[ epoch_of('min(f.datetime)') ]}
+		FROM zones z
+		CROSS JOIN LATERAL (
+			SELECT r.datetime FROM zone_readings r WHERE r.zone_id = z.zone_id
+			ORDER BY r.datetime LIMIT 1
+		) f
+		WHERE z.location_id = ?
 	}, undef, $loc->{id});
 
 	$c->render(json => {
