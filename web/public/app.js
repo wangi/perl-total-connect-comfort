@@ -263,13 +263,13 @@
       series.push(outdoor);
       cols.push(data.outdoor);
     } else {
-      series.push({ label: 'Temperature', stroke: css('--series-1'), width: 2.25, value: fmtTemp });
+      series.push({ label: 'Temperature', stroke: css('--series-1'), width: 3, value: fmtTemp });
       cols.push(data.temperature);
       series.push({ label: 'Target', stroke: css('--target'), width: 1.5, paths: uPlot.paths.stepped({ align: 1 }), value: fmtTemp });
       cols.push(data.target);
       cols.stepCol = cols.length - 1;
       data.years.forEach((y, i) => {
-        series.push({ label: y.label, stroke: css(`--year-${Math.min(i + 1, 3)}`), width: 1.5, value: fmtTemp });
+        series.push({ label: y.label, stroke: css(`--year-${Math.min(i + 1, 3)}`), width: 1.25, value: fmtTemp });
         cols.push(y.temperature);
       });
       series.push(outdoor);

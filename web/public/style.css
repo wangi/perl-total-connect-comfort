@@ -19,10 +19,10 @@
   --series-7: #6250d6;
   --series-8: #e34948;
 
-  /* past years: ordinal blue ramp, most recent darkest */
-  --year-1: #5598e7;
-  --year-2: #86b6ef;
-  --year-3: #9ec5f4;
+  /* past years: recessive greys, most recent darkest */
+  --year-1: #a8a7a0;
+  --year-2: #bfbeb8;
+  --year-3: #d2d1cc;
 
   --outdoor:  #75746f;
   --target:   #eb6834;
@@ -55,9 +55,9 @@
     --series-7: #9085e9;
     --series-8: #e66767;
 
-    --year-1: #256abf;
-    --year-2: #1c5cab;
-    --year-3: #184f95;
+    --year-1: #7d7c74;
+    --year-2: #64635d;
+    --year-3: #504f4a;
 
     --outdoor:  #9a998f;
     --target:   #d95926;
@@ -79,7 +79,7 @@
   --accent:         #3987e5;
   --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
   --series-5: #d55181; --series-6: #0ca30c; --series-7: #9085e9; --series-8: #e66767;
-  --year-1: #256abf; --year-2: #1c5cab; --year-3: #184f95;
+  --year-1: #7d7c74; --year-2: #64635d; --year-3: #504f4a;
   --outdoor: #9a998f; --target: #d95926; --demand: rgba(217, 89, 38, 0.16);
   --critical-bg: #3a1c1c; --warning-bg: #3a2f14;
 }
