@@ -22,9 +22,3 @@ Call the test script with ./test_api.pl *username* *password* (don't forget to s
 - Per-zone view: temperature, target, outdoor temperature, shading where the zone was calling for heat, and the same period in previous years
 - Current and historical low-battery warnings, and a warning if the logger has stopped
 - Plain HTTP on port 8080 by default; put TLS and authentication in front of it with a reverse proxy
-
-## Cacti
-
-Also includes Cacti scripts and templates to make setting up Cacti monitoring simple.
-
-I've written a [Cacti setup guide](http://will.dollman.org/2014/10/03/totalconnectcomfort-and-cacti-setup-guide/) (because sadly it's not *that* simple).

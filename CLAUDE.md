@@ -64,15 +64,6 @@ The module ([Device/TotalConnectComfort.pm](Device/TotalConnectComfort.pm)) prov
 - All URLs in the page are relative, so it works when proxied under a sub-path (as long as the proxied path ends in `/`)
 - Run locally against the live DB: `ssh -N -L 15432:localhost:5432 evohome@evohome.home`, then `DB_CONNECTION='DBI:Pg:dbname=evohome;host=localhost;port=15432' DB_USERNAME=... DB_PASSWORD=... web/tcc-web.pl daemon -l http://127.0.0.1:18080`
 
-**[cacti-scripts/temperature.pl](cacti-scripts/temperature.pl)**: Cacti monitoring integration
-- Returns all zone temperatures and setpoints in Cacti format
-- Calculates boiler status (on if any zone setpoint > temperature)
-- Output format: `zone_name:temp zone_name_setpoint:setpoint boiler_status:1`
-
-**[cacti-scripts/one_temp.pl](cacti-scripts/one_temp.pl)**: Single zone temperature for Cacti
-- Simplified version that outputs temperature for one configurable zone
-- Zone name set via `$ZONE` variable (default: 'living room')
-
 ## Development Workflow
 
 ### Testing the Module
