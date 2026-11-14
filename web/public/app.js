@@ -263,17 +263,21 @@
       series.push(outdoor);
       cols.push(data.outdoor);
     } else {
-      series.push({ label: 'Temperature', stroke: css('--series-1'), width: 3, value: fmtTemp });
-      cols.push(data.temperature);
-      series.push({ label: 'Target', stroke: css('--target'), width: 1.5, paths: uPlot.paths.stepped({ align: 1 }), value: fmtTemp });
+      // uPlot draws series in order, so the zone temperature goes last to sit
+      // on top; legendOrder keeps the legend reading Temperature, Target, ...
+      const n = data.years.length;
+      series.push({ ...outdoor, legendOrder: n + 3 });
+      cols.push(data.outdoor);
+      for (let i = n - 1; i >= 0; i--) { // oldest first, so recent years sit above
+        const y = data.years[i];
+        series.push({ label: y.label, stroke: css(`--year-${Math.min(i + 1, 3)}`), width: 1.25, value: fmtTemp, legendOrder: i + 3 });
+        cols.push(y.temperature);
+      }
+      series.push({ label: 'Target', role: 'target', stroke: css('--target'), width: 1.5, paths: uPlot.paths.stepped({ align: 1 }), value: fmtTemp, legendOrder: 2 });
       cols.push(data.target);
       cols.stepCol = cols.length - 1;
-      data.years.forEach((y, i) => {
-        series.push({ label: y.label, stroke: css(`--year-${Math.min(i + 1, 3)}`), width: 1.25, value: fmtTemp });
-        cols.push(y.temperature);
-      });
-      series.push(outdoor);
-      cols.push(data.outdoor);
+      series.push({ label: 'Temperature', role: 'temp', stroke: css('--series-1'), width: 3, value: fmtTemp, legendOrder: 1 });
+      cols.push(data.temperature);
     }
     return { series, cols };
   }
@@ -302,7 +306,8 @@
       hooks: {
         drawAxes: (u) => {
           if (!state.zone) return;
-          const t = u.data[0], temp = u.data[1], target = u.data[2];
+          const idx = (role) => u.series.findIndex((s) => s.role === role);
+          const t = u.data[0], temp = u.data[idx('temp')], target = u.data[idx('target')];
           const { top, height } = u.bbox;
           const ctx = u.ctx;
           ctx.save();
@@ -391,6 +396,12 @@
       plugins: [demandPlugin(), faultPlugin()],
     }, filled, el);
 
+    // Show legend entries in reading order rather than drawing order.
+    chart.root.querySelectorAll('.u-legend .u-series').forEach((tr, i) => {
+      const o = chart.series[i].legendOrder;
+      if (o != null) tr.style.order = o;
+    });
+
     renderKey();
   }
 
@@ -442,10 +453,13 @@
   function renderTable() {
     const details = $('table-details');
     if (!details.open || !chart) { $('data-table').innerHTML = ''; return; }
-    const labels = chart.series.map((s) => s.label);
+    // Columns in legend order (Time first), not drawing order.
+    const order = chart.series.map((s, i) => i)
+      .sort((a, b) => (a === 0 ? -1 : b === 0 ? 1 : (chart.series[a].legendOrder ?? a) - (chart.series[b].legendOrder ?? b)));
+    const labels = order.map((i) => chart.series[i].label);
     const rows = [];
     for (let i = data.times.length - 1; i >= 0; i--) {
-      const cells = rawCols.slice(1).map((c) => (c[i] == null ? '' : c[i].toFixed(1)));
+      const cells = order.slice(1).map((k) => rawCols[k]).map((c) => (c[i] == null ? '' : c[i].toFixed(1)));
       if (cells.every((c) => c === '')) continue;
       rows.push(`<tr><td>${fmtDayTime.format(new Date(data.times[i] * 1000))}</td>${cells.map((c) => `<td>${c}</td>`).join('')}</tr>`);
     }

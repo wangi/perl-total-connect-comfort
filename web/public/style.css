@@ -189,6 +189,7 @@ button { font: inherit; color: inherit; }
 .u-legend .u-series th { font-weight: 500; cursor: pointer; }
 .u-legend .u-value { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .u-legend.u-inline tr { margin-right: 4px; }
+.u-legend.u-inline tbody { display: flex; flex-wrap: wrap; justify-content: center; }
 .u-legend .u-series:first-child .u-value { min-width: 10ch; display: inline-block; }
 .u-select { background: rgba(127, 127, 127, 0.15); }
 
